@@ -482,68 +482,16 @@ class UI:
         option = input(
             f'Please select an option (1-{len(states)}, \'Q\' to quit, \'C\' to confirm, or \'R\' to return): ')
 
-        if 'r' in option.lower():
-            if self.state != 'down_list':
+        if ',' in option:
+            opts = option.split(',')
+            states_data = []
 
-                if self.toggled.get('selected', []) or self.toggled.get('deselected', []):
-                    confirm = input(format_text(
-                        'You have unsaved changes! Save now? (Y/N): ', 'underline+bold'))
+            for opt in opts:
+                states_data = self.handle_opt(opt, item, states, removal)
 
-                    if 'y' in confirm.lower():
-                        self.confirm_expand()
-
-            self.return_state()
-        elif 'q' in option.lower():
-            self.quit()
-        elif 'c' in option.lower():
-            self.confirm_expand()
-
-            return self.expand_item(item, states, removal)
-
-        try:
-            if ',' in option:
-                num = [int(x) for x in option.split(',')]
-
-                # Funny way to remove duplicates.
-                num = list(dict.fromkeys(num))
-            else:
-                num = int(option)
-        except Exception:
-            print(color_text('Invalid option(s)!', 'red') + '\n')
-            self.enter()
-
-            return self.expand_item(item, states, removal)
-
-        if type(num) == int:
-            if num < 1 or num > len(states):
-                print(color_text(
-                    f'Out of range! Possible range: 1-{len(states)}', 'red') + '\n')
-                self.enter()
-
-                return self.expand_item(item, states, removal)
-
-            _data = (not states[num - 1][0], states[num - 1][1])
-
-            self.toggled.get(
-                'selected' if _data[0] else 'deselected', []).append(_data)
-
-            states[num - 1] = _data
-
+            states = states_data
         else:
-            for n in num:
-                if n < 1 or n > len(states):
-                    print(color_text(
-                        f'Out of range! Possible range: 1-{len(states)}', 'red') + '\n')
-                    self.enter()
-
-                    return self.expand_item(item, states, removal)
-
-                _data = (not states[n - 1][0], states[n - 1][1])
-
-                self.toggled.get(
-                    'selected' if _data[0] else 'deselected', []).append(_data)
-
-                states[n - 1] = _data
+            states_data = self.handle_opt(option, item, states, removal)
 
         return self.expand_item(None, states, removal)
 
