@@ -2,18 +2,18 @@ import os
 import sys
 import platform
 
-from src.data_types.KextsData import KextsData
-from .Text import COLORS, FORMAT
+from src.data_types.kexts_data import KEXTS_DATA
+from .text import COLORS, FORMAT
 
 end_fmt = FORMAT['end_formatting']
 dir_delim = '\\' if platform.system().lower() == 'windows' else '/'
 
 
-def color_text(text, color):
+def color_text(text, color) -> str:
     return f'{COLORS.get(color, "green")}{text}{end_fmt}'
 
 
-def format_text(text, formats):
+def format_text(text, formats) -> str:
     formats = formats.split('+')
     final_string = text
 
@@ -28,7 +28,7 @@ def format_text(text, formats):
     return final_string
 
 
-def title(name, additional=0):
+def title(name, additional=0) -> None:
     spaces = ' ' * int((53 - len(name)) / 2)
     additional = ' ' * additional
 
@@ -37,7 +37,7 @@ def title(name, additional=0):
     print(color_text('#' * 55 + '\n' * 2, 'cyan'))
 
 
-def clear():
+def clear() -> None:
     if sys.platform == 'win32':
         os.system('cls')
     elif sys.platform == 'darwin':
@@ -52,7 +52,7 @@ def clear():
         os.system('clear')
 
 
-def get_root_dir():
+def get_root_dir() -> str:
     root_dir = ''
 
     if getattr(sys, 'frozen', False):
@@ -67,7 +67,7 @@ def get_root_dir():
     return root_dir
 
 
-def file_diff(a, b):
+def file_diff(a, b) -> list:
     diff = []
 
     if not a or not b:
@@ -78,7 +78,7 @@ def file_diff(a, b):
 
         for j in range(len(b)):
             cond = a[i][1].version == b[j][1].version \
-                if type(a[i][1]) == KextsData and type(b[j][1]) == KextsData \
+                if type(a[i][1]) == KEXTS_DATA and type(b[j][1]) == KEXTS_DATA \
                 else a[i][1].name == b[j][1].name
 
             if cond:
