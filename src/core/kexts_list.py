@@ -1,7 +1,7 @@
 import requests
 from sys import exit
-from src.data_types.KextsData import KextsData
-from src.util.Utils import color_text
+from src.data_types.kexts_data import KEXTS_DATA
+from src.util.constants import PERCENT, OK, FAILED
 
 
 class KextsListObtainer:
@@ -13,27 +13,31 @@ class KextsListObtainer:
     '''
 
     def __init__(self):
-        self.kexts: list[KextsData] = []
+        self.kexts: list[KEXTS_DATA] = []
         self.url = 'https://raw.githubusercontent.com/dortania/build-repo/builds/config.json'
 
         try:
-            print(f'[    {color_text("%" , "cyan")}    ]: Running integrity verification...')
+            print(
+                f'{PERCENT} Running Kext integrity validation...')
 
-            if not self.test():
-                raise RuntimeError(f'[  {color_text("FAILED", "red")}  ]: Something went wrong when verifying integrity of data types. '
-                                   'This should not happen — please report this at our issues page.'
-                                   )
-            else:
-                print(
-                    f'[    {color_text("OK", "green")}    ]: Integrity verification check completed successfully.')
-        except Exception as e:
-            print(f'{str(e)}')
+            if self.test():
+                raise RuntimeError(
+                    f'{FAILED}' +
+                    'Something went wrong when validating the integrity of the "KEXT" data type.\n' +
+                    'This should not happen — please report this at our issues page.'
+                )
+
+            print(
+                f'{OK} Kext integrity validity check completed successfully.')
+        except Exception as err:
+            print(str(err))
 
         self.fetch_list()
 
-    def fetch_list(self):
+    def fetch_list(self) -> None:
         try:
-            print(f'[    {color_text("%" , "cyan")}    ]: Fetching Kexts list...')
+            print(
+                f'{PERCENT} Fetching Kexts list...')
             r = requests.get(self.url).json()
             filtered = {}
 
@@ -44,11 +48,12 @@ class KextsListObtainer:
 
                     filtered[key] = r[key]
         except Exception as e:
-            print(f'[  {color_text("FAILED", "red")}  ]: Something went wrong during the fetching process. This should not happen — please report this at our issues page.')
+            print(f'{FAILED} Something went wrong during the fetching process. This should not happen — please report this at our issues page.')
             print(f'\t^^^^^^{str(e)}')
             exit(0)
 
-        print(f'[    {color_text("OK", "green")}    ]: Successfully obtained Kexts list.')
+        print(
+            f'{OK} Successfully obtained Kexts list.')
 
         for key in filtered.keys():
             n = 0
@@ -80,40 +85,30 @@ class KextsListObtainer:
                 low = '.'.join(min(alt))
 
                 print(
-                    f'[    {color_text("%" , "cyan")}    ]: Attempting to map {key} (v{low} - v{high})...')
+                    f'{PERCENT} Attempting to map {key} (v{low} - v{high})...')
 
                 try:
                     for version in versions:
                         ver = version.get('version', '')
                         self.kexts.append(
-                            KextsData(
+                            KEXTS_DATA(
                                 name=key,
-                                link=version.get('links', {}).get('release', ''),
+                                link=version.get('links', {}).get(
+                                    'release', ''),
                                 version=ver,
                                 ver_range=f'v{low}-v{high}'
                             )
                         )
 
                     print(
-                        f'[    {color_text("OK", "green")}    ]: Successfully mapped {key} (v{low} - v{high})!')
+                        f'{OK} Successfully mapped {key} (v{low} - v{high})!')
                 except Exception as e:
                     print(
-                        f'[  {color_text("FAILED", "red")}  ]: Failed to map {key} (v{low} - v{high})! This shouldn\'t happen — please report this at our issue page.')
+                        f'{FAILED} Failed to map {key} (v{low} - v{high})! This shouldn\'t happen — please report this at our issue page.')
                     print(f'\t^^^^^^{str(e)}')
 
     def validate_item(self, item) -> bool:
-        if type(item) == dict:
-            for key in item.keys():
-                if key.lower() != 'name' and \
-                        key.lower() != 'link_rel' and \
-                        key.lower() != 'link_debug' and \
-                        key.lower() != 'version' and \
-                        key.lower() != 'ver_range':
-                    return False
-        else:
-            return isinstance(item, KextsData)
-
-        return True
+        return isinstance(item, KEXTS_DATA)
 
     def validate_kexts_list(self, kexts=[]) -> list:
         failed = []
@@ -123,19 +118,14 @@ class KextsListObtainer:
                 failed.append(kext)
 
         return failed
-        # return
 
     def test(self) -> bool:
         test_kexts = [
-            KextsData(name='Lilu.kext', link='https://google.com', version='2.1.5', ver_range='v2.0.8-v2.1.5'),
-
-            {'name': 'WhateverGreen.kext', 'link': 'https://google.com', 'version': '2.1.5'},
+            KEXTS_DATA(name='Lilu.kext', link='https://google.com',
+                       version='2.1.5', ver_range='v2.0.8-v2.1.5'),
 
             # Should fail here upon validation – otherwise, something's definitely wrong.
-            {'lff': 123}
+            {'foo': 'bar'}
         ]
 
-        if self.validate_kexts_list(test_kexts):
-            return True
-
-        return False
+        return not self.validate_kexts_list(test_kexts)
