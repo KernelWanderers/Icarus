@@ -3,9 +3,8 @@ import sys
 import zipfile
 import shutil
 from urllib.request import urlretrieve
-from src.data_types.KextsData import KextsData
-from src.data_types.ACPIData import ACPIData
-from src.util.Utils import dir_delim, color_text, format_text, title, clear, get_root_dir, file_diff
+from src.data_types.kexts_data import KEXTS_DATA
+from src.util.utils import dir_delim, color_text, format_text, title, clear, get_root_dir, file_diff
 
 
 class UI:
@@ -202,7 +201,7 @@ class UI:
         zips = []
 
         for item in self.to_download:
-            sub = 'Kexts' if type(item[1]) == KextsData else 'ACPI'
+            sub = 'Kexts' if type(item[1]) == KEXTS_DATA else 'ACPI'
 
             u_name = format_text(item[1].name, 'underline')
 
@@ -465,7 +464,7 @@ class UI:
             try:
                 ver = ''
 
-                if type(states[i][1]) == KextsData:
+                if type(states[i][1]) == KEXTS_DATA:
                     ver = f'(v{states[i][1].version})'
 
                 txt = f'({i + 1}) — ' + \

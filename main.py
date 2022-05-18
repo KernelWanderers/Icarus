@@ -1,6 +1,6 @@
-from src.core.KextsList import KextsListObtainer
-from src.core.ACPIList import ACPIListObtainer
-from src.cli.UI import UI
+from src.core.kexts_list import KextsListObtainer
+from src.core.acpi_list import ACPIListObtainer
+from src.cli.ui import UI
 
 KLO = KextsListObtainer()
 ACPI = ACPIListObtainer()
